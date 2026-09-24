@@ -1,0 +1,28 @@
+===============================================================
+  Nota del equipo de guardia  ·  AdminLinux Clase 13
+===============================================================
+
+Te dejo el material del incidente de anoche en logs/.
+
+Tres avisos antes de que te pongas a contar:
+
+  1) Hay un archivo con un ESPACIO en el nombre. Si tu bucle usa
+     $(ls) se te va a partir en dos y vas a contar de menos.
+     Recorré con glob y entrecomillá la variable.
+
+  2) Adentro de logs/ hay un subdirectorio viejos/ con material
+     del año pasado. NO es parte de este incidente: si grepeás
+     recursivo te va a ensuciar TODOS los numeros.
+     (Y si encontrás una BANDERA{...} ahí adentro: es la del reto
+      del año pasado. No sirve. Es un señuelo.)
+
+  3) Contá el nivel [ERROR] EXACTO. Las lineas [error] en
+     minuscula son ruido de una libreria y no son fallos, y hay
+     lineas [INFO] que nombran la palabra ERROR en un resumen.
+
+Formato de la bandera (esto es solo el molde, no la respuesta):
+
+      BANDERA{<R1>-<R2>-<R3>}         ejemplo de FORMA: BANDERA{00-hostX-00}
+
+Suerte. Cuando la tengas verificada, se la decis al profe.
+===============================================================

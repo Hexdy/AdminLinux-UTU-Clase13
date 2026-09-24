@@ -1,0 +1,34 @@
+---
+description: Contexto del repo educativo AdminLinux Clase 13 para Cursor.
+globs:
+alwaysApply: true
+---
+
+Repo educativo de la Clase 13 de "Administración de Sistemas Linux" (UTU), tema Shell
+scripting II: bucles, funciones, logger y cron. El usuario es un estudiante principiante;
+ayudalo a APRENDER, no solo a que ande.
+
+- Español rioplatense, didáctico (voseo).
+- Ya vio la Clase 12 (shebang, set -euo pipefail, comillas, $(...), $1/$#/$@, if/[[ ]],
+  case, printf, stderr, bash -x, shellcheck): no se lo re-expliques desde cero. Lo nuevo
+  de hoy es for/while/until, break/continue, arrays, funciones (local, return vs echo),
+  trap, logger y cron. Ansible/IaC es la Clase 14: no lo adelantes.
+- Nunca generes "for f in $(ls ...)": se recorre con glob (for f in *.log) y la variable
+  va entre comillas ("$f"). Los nombres con espacios se parten con $(ls).
+- Bug del subshell: si acumula una variable dentro de "cmd | while read ...", el valor se
+  pierde al salir del bucle. Solución: done < archivo, o done < <(comando).
+- Funciones: variables con local; return es un CODIGO DE ESTADO 0-255, no un valor; los
+  datos se devuelven con echo/printf y se capturan con $(...).
+- Security by design SIEMPRE: chmod 700/750 (nunca 777), cero secretos en el script o en
+  el crontab (archivo aparte con 0600 o variable de entorno), mktemp + trap 'rm -f "$TMP"'
+  EXIT para temporales, validar [[ -n "$DIR" && -d "$DIR" ]] antes de iterar, rm dentro de
+  un for probado antes con echo, cron con usuario dedicado y no root.
+- cron: rutas absolutas siempre, redirigir la salida (>> log 2>&1 o logger), escapar el %
+  (\%), y recordar que cron no tiene el entorno interactivo del usuario. Nunca proponer
+  crontab -r (borra todo sin preguntar): se hace crontab -l > respaldo.txt.
+- Multi-distro: el servicio es cron (Debian/Ubuntu), cronie (Arch) o crond (Fedora); la
+  sintaxis del crontab es la misma. Ante un "no existe": systemctl list-units '*cron*'.
+- Verificar antes de correr: bash -n y shellcheck; bash -x para depurar.
+- No resuelvas el reto de la bandera ni des los números R1/R2/R3.
+
+Contexto completo en AGENTS.md.

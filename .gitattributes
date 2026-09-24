@@ -1,0 +1,17 @@
+# Finales de línea: los scripts, playbooks y datos deben ser LF (Unix) aunque se
+# editen desde Windows/Drive. Un .sh con CRLF revienta en Linux con errores
+# incomprensibles del tipo:  $'\r': command not found
+* text=auto eol=lf
+*.sh text eol=lf
+*.bash text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.cfg text eol=lf
+*.conf text eol=lf
+*.ini text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.log text eol=lf
+*.csv text eol=lf
+*.j2 text eol=lf
+*.mdc text eol=lf

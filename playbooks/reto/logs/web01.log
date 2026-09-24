@@ -1,0 +1,90 @@
+2026-09-17T01:11:02-03:00 web01 tienda-api[1731]: [ERROR] code=E401 token vencido para el usuario mrodriguez
+2026-09-17T01:11:47-03:00 web01 tienda-api[1731]: [ERROR] code=E507 sin espacio en /var/log/tienda
+2026-09-17T01:12:49-03:00 web01 tienda-api[1731]: [INFO] peticion GET /api/pedidos 200 en 42 ms
+2026-09-17T01:13:50-03:00 web01 tienda-api[1731]: [INFO] peticion POST /api/carrito 201 en 88 ms
+2026-09-17T01:14:18-03:00 web01 tienda-api[1731]: [INFO] respaldo diario completado en 12 min
+2026-09-17T01:14:31-03:00 web01 tienda-api[1731]: [ERROR] code=E504 upstream timeout tras 45s contra dbnode1
+2026-09-17T01:15:18-03:00 web01 tienda-api[1731]: [WARN] cola de trabajos en 480 items
+2026-09-17T01:15:30-03:00 web01 tienda-api[1731]: [INFO] usuario jgomez autenticado desde 192.168.10.47
+2026-09-17T01:16:22-03:00 web01 tienda-api[1731]: [INFO] rotacion de log completada
+2026-09-17T01:16:48-03:00 web01 tienda-api[1731]: [INFO] usuario jgomez autenticado desde 192.168.10.47
+2026-09-17T01:17:09-03:00 web01 tienda-api[1731]: [WARN] el certificado de tienda.local vence en 12 dias
+2026-09-17T01:17:23-03:00 web01 tienda-api[1731]: [INFO] cache caliente: 12400 claves
+2026-09-17T01:17:54-03:00 web01 tienda-api[1731]: [INFO] reconexion con dbnode1 establecida
+2026-09-17T01:19:01-03:00 web01 tienda-api[1731]: [ERROR] code=E500 excepcion no controlada en /api/clientes
+2026-09-17T01:19:51-03:00 web01 tienda-api[1731]: [INFO] peticion GET /api/pedidos 200 en 42 ms
+2026-09-17T01:20:28-03:00 web01 tienda-api[1731]: [INFO] usuario jgomez autenticado desde 192.168.10.47
+2026-09-17T01:21:26-03:00 web01 tienda-api[1731]: [WARN] reintento 2/5 contra dbnode1
+2026-09-17T01:21:55-03:00 web01 tienda-api[1731]: [INFO] peticion POST /api/carrito 201 en 88 ms
+2026-09-17T01:23:02-03:00 web01 tienda-api[1731]: [INFO] peticion POST /api/carrito 201 en 88 ms
+2026-09-17T01:24:05-03:00 web01 tienda-api[1731]: [ERROR] code=E401 token vencido para el usuario jgomez
+2026-09-17T01:24:52-03:00 web01 tienda-api[1731]: [INFO] usuario mrodriguez autenticado desde 192.168.10.23
+2026-09-17T01:25:27-03:00 web01 tienda-api[1731]: [INFO] cache caliente: 12400 claves
+2026-09-17T01:25:48-03:00 web01 tienda-api[1731]: [INFO] respaldo diario completado en 12 min
+2026-09-17T01:26:31-03:00 web01 tienda-api[1731]: [ERROR] code=E401 token vencido para el usuario mrodriguez
+2026-09-17T01:27:17-03:00 web01 tienda-api[1731]: [WARN] reintento 2/5 contra dbnode1
+2026-09-17T01:27:53-03:00 web01 tienda-api[1731]: [INFO] usuario mrodriguez autenticado desde 192.168.10.23
+2026-09-17T01:28:35-03:00 web01 tienda-api[1731]: [INFO] respaldo diario completado en 12 min
+2026-09-17T01:28:46-03:00 web01 tienda-api[1731]: [ERROR] code=E500 excepcion no controlada en /api/clientes
+2026-09-17T01:29:16-03:00 web01 tienda-api[1731]: [WARN] conexion lenta con 192.168.10.23
+2026-09-17T01:29:39-03:00 web01 tienda-api[1731]: [INFO] respaldo diario completado en 12 min
+2026-09-17T01:30:24-03:00 web01 tienda-api[1731]: [INFO] respaldo diario completado en 12 min
+2026-09-17T01:31:13-03:00 web01 tienda-api[1731]: [WARN] cola de trabajos en 480 items
+2026-09-17T01:32:20-03:00 web01 tienda-api[1731]: [error] cache miss en la capa de compatibilidad
+2026-09-17T01:32:42-03:00 web01 tienda-api[1731]: [INFO] usuario jgomez autenticado desde 192.168.10.47
+2026-09-17T01:33:46-03:00 web01 tienda-api[1731]: [INFO] usuario mrodriguez autenticado desde 192.168.10.23
+2026-09-17T01:34:42-03:00 web01 tienda-api[1731]: [INFO] reconexion con dbnode1 establecida
+2026-09-17T01:35:31-03:00 web01 tienda-api[1731]: [ERROR] code=E500 excepcion no controlada en /api/pedidos
+2026-09-17T01:36:18-03:00 web01 tienda-api[1731]: [ERROR] code=E502 bad gateway desde 10.20.30.15
+2026-09-17T01:37:15-03:00 web01 tienda-api[1731]: [ERROR] code=E507 sin espacio en /var/log/tienda
+2026-09-17T01:38:25-03:00 web01 tienda-api[1731]: [INFO] usuario jgomez autenticado desde 192.168.10.47
+2026-09-17T01:39:19-03:00 web01 tienda-api[1731]: [INFO] cache caliente: 12400 claves
+2026-09-17T01:39:52-03:00 web01 tienda-api[1731]: [ERROR] code=E401 token vencido para el usuario mrodriguez
+2026-09-17T01:40:04-03:00 web01 tienda-api[1731]: [INFO] reconexion con dbnode1 establecida
+2026-09-17T01:40:43-03:00 web01 tienda-api[1731]: [WARN] conexion lenta con 192.168.10.23
+2026-09-17T01:41:31-03:00 web01 tienda-api[1731]: [WARN] el certificado de tienda.local vence en 12 dias
+2026-09-17T01:42:39-03:00 web01 tienda-api[1731]: [INFO] cache caliente: 12400 claves
+2026-09-17T01:43:03-03:00 web01 tienda-api[1731]: [ERROR] code=E401 token vencido para el usuario mrodriguez
+2026-09-17T01:44:04-03:00 web01 tienda-api[1731]: [INFO] reconexion con dbnode1 establecida
+2026-09-17T01:44:21-03:00 web01 tienda-api[1731]: [WARN] conexion lenta con 192.168.10.23
+2026-09-17T01:45:14-03:00 web01 tienda-api[1731]: [INFO] cache caliente: 12400 claves
+2026-09-17T01:45:48-03:00 web01 tienda-api[1731]: [WARN] reintento 2/5 contra dbnode1
+2026-09-17T01:46:43-03:00 web01 tienda-api[1731]: [WARN] reintento 2/5 contra dbnode1
+2026-09-17T01:47:37-03:00 web01 tienda-api[1731]: [INFO] peticion GET /api/pedidos 200 en 42 ms
+2026-09-17T01:47:43-03:00 web01 tienda-api[1731]: [INFO] rotacion de log completada
+2026-09-17T01:47:48-03:00 web01 tienda-api[1731]: [INFO] reconexion con dbnode1 establecida
+2026-09-17T01:48:07-03:00 web01 tienda-api[1731]: [INFO] reconexion con dbnode1 establecida
+2026-09-17T01:49:05-03:00 web01 tienda-api[1731]: [INFO] usuario mrodriguez autenticado desde 192.168.10.23
+2026-09-17T01:50:13-03:00 web01 tienda-api[1731]: [WARN] latencia alta: 1840 ms en /api/stock
+2026-09-17T01:51:13-03:00 web01 tienda-api[1731]: [WARN] el certificado de tienda.local vence en 12 dias
+2026-09-17T01:51:20-03:00 web01 tienda-api[1731]: [INFO] rotacion de log completada
+2026-09-17T01:52:05-03:00 web01 tienda-api[1731]: [ERROR] code=E502 bad gateway desde 10.20.30.16
+2026-09-17T01:52:44-03:00 web01 tienda-api[1731]: [ERROR] code=E503 pool de conexiones agotado (max=40)
+2026-09-17T01:52:56-03:00 web01 tienda-api[1731]: [WARN] disco /var al 78% de uso
+2026-09-17T01:53:36-03:00 web01 tienda-api[1731]: [ERROR] code=E507 sin espacio en /var/lib/tienda
+2026-09-17T01:54:43-03:00 web01 tienda-api[1731]: [ERROR] code=E401 token vencido para el usuario jgomez
+2026-09-17T01:54:47-03:00 web01 tienda-api[1731]: [INFO] usuario mrodriguez autenticado desde 192.168.10.23
+2026-09-17T01:55:41-03:00 web01 tienda-api[1731]: [error] cache miss en la capa de compatibilidad
+2026-09-17T01:56:43-03:00 web01 tienda-api[1731]: [INFO] usuario jgomez autenticado desde 192.168.10.47
+2026-09-17T01:57:53-03:00 web01 tienda-api[1731]: [INFO] peticion POST /api/carrito 201 en 88 ms
+2026-09-17T01:58:22-03:00 web01 tienda-api[1731]: [INFO] cache caliente: 12400 claves
+2026-09-17T01:58:45-03:00 web01 tienda-api[1731]: [ERROR] code=E507 sin espacio en /var/lib/tienda
+2026-09-17T01:59:32-03:00 web01 tienda-api[1731]: [WARN] disco /var al 78% de uso
+2026-09-17T02:00:32-03:00 web01 tienda-api[1731]: [INFO] usuario mrodriguez autenticado desde 192.168.10.23
+2026-09-17T02:00:47-03:00 web01 tienda-api[1731]: [ERROR] code=E507 sin espacio en /var/log/tienda
+2026-09-17T02:01:19-03:00 web01 tienda-api[1731]: [INFO] rotacion de log completada
+2026-09-17T02:02:14-03:00 web01 tienda-api[1731]: [WARN] memoria del proceso al 87%
+2026-09-17T02:03:24-03:00 web01 tienda-api[1731]: [ERROR] code=E401 token vencido para el usuario jgomez
+2026-09-17T02:03:39-03:00 web01 tienda-api[1731]: [ERROR] code=E504 upstream timeout tras 30s
+2026-09-17T02:04:26-03:00 web01 tienda-api[1731]: [WARN] conexion lenta con 192.168.10.23
+2026-09-17T02:05:00-03:00 web01 tienda-api[1731]: [INFO] reconexion con dbnode1 establecida
+2026-09-17T02:05:37-03:00 web01 tienda-api[1731]: [WARN] el certificado de tienda.local vence en 12 dias
+2026-09-17T02:06:01-03:00 web01 tienda-api[1731]: [INFO] rotacion de log completada
+2026-09-17T02:06:42-03:00 web01 tienda-api[1731]: [ERROR] code=E502 bad gateway desde 10.20.30.16
+2026-09-17T02:07:46-03:00 web01 tienda-api[1731]: [INFO] peticion POST /api/carrito 201 en 88 ms
+2026-09-17T02:08:14-03:00 web01 tienda-api[1731]: [ERROR] code=E503 servicio dependiente sin responder
+2026-09-17T02:09:11-03:00 web01 tienda-api[1731]: [WARN] cola de trabajos en 480 items
+2026-09-17T02:09:39-03:00 web01 tienda-api[1731]: [INFO] peticion POST /api/carrito 201 en 88 ms
+2026-09-17T02:10:49-03:00 web01 tienda-api[1731]: [INFO] reconexion con dbnode1 establecida
+2026-09-17T02:10:56-03:00 web01 tienda-api[1731]: [INFO] recordatorio: filtrar por el nivel exacto, no por la palabra ERROR suelta
+2026-09-17T02:11:55-03:00 web01 tienda-api[1731]: [ERROR] code=E504 upstream timeout tras 30s

@@ -1,0 +1,34 @@
+# Git ignora estos archivos: NUNCA se suben al repo.
+# Security by design: mantené secretos y basura fuera del control de versiones.
+
+.env
+*.env
+!.env.example
+*.key
+*.pem
+id_rsa
+id_ed25519
+secrets.*
+*.secret
+
+# Config de ejemplo que lee el script integrador (lleva credenciales de mentira,
+# pero la costumbre es NO versionar archivos de config con valores reales).
+mantenimiento.conf
+
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+*.tmp
+*.bak
+__pycache__/
+
+# Salida de tus propios scripts mientras practicás.
+*.log.1
+salida_*.txt
+
+# Área de trabajo que genera el playbook armar_reto.yml (no se versiona:
+# se regenera con Ansible). La FUENTE del reto vive en playbooks/reto/.
+datos/reto/

@@ -1,0 +1,65 @@
+2026-09-17T03:06:19-03:00 worker01 tienda-api[3729]: [WARN] latencia alta: 1840 ms en /api/stock
+2026-09-17T03:07:12-03:00 worker01 tienda-api[3729]: [error] cache miss en la capa de compatibilidad
+2026-09-17T03:07:31-03:00 worker01 tienda-api[3729]: [WARN] disco /var al 78% de uso
+2026-09-17T03:08:04-03:00 worker01 tienda-api[3729]: [INFO] panel de metricas actualizado: ERROR, WARN e INFO por minuto
+2026-09-17T03:08:18-03:00 worker01 tienda-api[3729]: [ERROR] code=E504 upstream timeout tras 30s
+2026-09-17T03:08:26-03:00 worker01 tienda-api[3729]: [INFO] peticion GET /api/pedidos 200 en 42 ms
+2026-09-17T03:09:14-03:00 worker01 tienda-api[3729]: [WARN] reintento 2/5 contra dbnode1
+2026-09-17T03:09:30-03:00 worker01 tienda-api[3729]: [INFO] usuario jgomez autenticado desde 192.168.10.47
+2026-09-17T03:09:34-03:00 worker01 tienda-api[3729]: [ERROR] code=E503 servicio dependiente sin responder
+2026-09-17T03:10:29-03:00 worker01 tienda-api[3729]: [ERROR] code=E429 rate limit alcanzado para el cliente 172.16.8.42
+2026-09-17T03:11:33-03:00 worker01 tienda-api[3729]: [INFO] usuario mrodriguez autenticado desde 192.168.10.23
+2026-09-17T03:11:48-03:00 worker01 tienda-api[3729]: [ERROR] code=E504 upstream timeout tras 30s
+2026-09-17T03:12:54-03:00 worker01 tienda-api[3729]: [INFO] usuario jgomez autenticado desde 192.168.10.47
+2026-09-17T03:13:50-03:00 worker01 tienda-api[3729]: [INFO] peticion POST /api/carrito 201 en 88 ms
+2026-09-17T03:14:10-03:00 worker01 tienda-api[3729]: [INFO] rotacion de log completada
+2026-09-17T03:14:56-03:00 worker01 tienda-api[3729]: [ERROR] code=E401 token vencido para el usuario jgomez
+2026-09-17T03:15:18-03:00 worker01 tienda-api[3729]: [WARN] conexion lenta con 192.168.10.23
+2026-09-17T03:15:57-03:00 worker01 tienda-api[3729]: [INFO] peticion POST /api/carrito 201 en 88 ms
+2026-09-17T03:16:59-03:00 worker01 tienda-api[3729]: [INFO] reconexion con dbnode1 establecida
+2026-09-17T03:17:50-03:00 worker01 tienda-api[3729]: [ERROR] code=E503 servicio dependiente sin responder
+2026-09-17T03:17:56-03:00 worker01 tienda-api[3729]: [WARN] disco /var al 78% de uso
+2026-09-17T03:18:55-03:00 worker01 tienda-api[3729]: [INFO] rotacion de log completada
+2026-09-17T03:19:28-03:00 worker01 tienda-api[3729]: [WARN] conexion lenta con 192.168.10.23
+2026-09-17T03:20:16-03:00 worker01 tienda-api[3729]: [INFO] respaldo diario completado en 12 min
+2026-09-17T03:21:03-03:00 worker01 tienda-api[3729]: [INFO] respaldo diario completado en 12 min
+2026-09-17T03:21:08-03:00 worker01 tienda-api[3729]: [WARN] cola de trabajos en 480 items
+2026-09-17T03:22:15-03:00 worker01 tienda-api[3729]: [INFO] peticion POST /api/carrito 201 en 88 ms
+2026-09-17T03:22:40-03:00 worker01 tienda-api[3729]: [INFO] usuario jgomez autenticado desde 192.168.10.47
+2026-09-17T03:22:45-03:00 worker01 tienda-api[3729]: [INFO] peticion GET /api/pedidos 200 en 42 ms
+2026-09-17T03:23:54-03:00 worker01 tienda-api[3729]: [INFO] rotacion de log completada
+2026-09-17T03:24:10-03:00 worker01 tienda-api[3729]: [ERROR] code=E401 token vencido para el usuario mrodriguez
+2026-09-17T03:25:13-03:00 worker01 tienda-api[3729]: [WARN] latencia alta: 1840 ms en /api/stock
+2026-09-17T03:25:59-03:00 worker01 tienda-api[3729]: [INFO] respaldo diario completado en 12 min
+2026-09-17T03:26:53-03:00 worker01 tienda-api[3729]: [INFO] rotacion de log completada
+2026-09-17T03:26:56-03:00 worker01 tienda-api[3729]: [WARN] reintento 2/5 contra dbnode1
+2026-09-17T03:27:36-03:00 worker01 tienda-api[3729]: [INFO] peticion POST /api/carrito 201 en 88 ms
+2026-09-17T03:28:34-03:00 worker01 tienda-api[3729]: [INFO] rotacion de log completada
+2026-09-17T03:29:30-03:00 worker01 tienda-api[3729]: [INFO] respaldo diario completado en 12 min
+2026-09-17T03:30:03-03:00 worker01 tienda-api[3729]: [INFO] usuario mrodriguez autenticado desde 192.168.10.23
+2026-09-17T03:31:12-03:00 worker01 tienda-api[3729]: [ERROR] code=E504 upstream timeout tras 30s
+2026-09-17T03:32:06-03:00 worker01 tienda-api[3729]: [ERROR] code=E504 upstream timeout tras 45s contra dbnode1
+2026-09-17T03:33:05-03:00 worker01 tienda-api[3729]: [ERROR] code=E401 token vencido para el usuario mrodriguez
+2026-09-17T03:33:08-03:00 worker01 tienda-api[3729]: [WARN] memoria del proceso al 87%
+2026-09-17T03:33:56-03:00 worker01 tienda-api[3729]: [INFO] respaldo diario completado en 12 min
+2026-09-17T03:34:18-03:00 worker01 tienda-api[3729]: [INFO] cache caliente: 12400 claves
+2026-09-17T03:34:55-03:00 worker01 tienda-api[3729]: [INFO] peticion GET /api/pedidos 200 en 42 ms
+2026-09-17T03:35:29-03:00 worker01 tienda-api[3729]: [WARN] reintento 2/5 contra dbnode1
+2026-09-17T03:36:14-03:00 worker01 tienda-api[3729]: [INFO] reconexion con dbnode1 establecida
+2026-09-17T03:36:33-03:00 worker01 tienda-api[3729]: [INFO] usuario jgomez autenticado desde 192.168.10.47
+2026-09-17T03:37:25-03:00 worker01 tienda-api[3729]: [ERROR] code=E429 rate limit alcanzado para el cliente 172.16.8.42
+2026-09-17T03:37:48-03:00 worker01 tienda-api[3729]: [INFO] usuario jgomez autenticado desde 192.168.10.47
+2026-09-17T03:38:09-03:00 worker01 tienda-api[3729]: [INFO] peticion GET /api/pedidos 200 en 42 ms
+2026-09-17T03:38:31-03:00 worker01 tienda-api[3729]: [INFO] peticion POST /api/carrito 201 en 88 ms
+2026-09-17T03:38:42-03:00 worker01 tienda-api[3729]: [INFO] usuario jgomez autenticado desde 192.168.10.47
+2026-09-17T03:39:27-03:00 worker01 tienda-api[3729]: [ERROR] code=E507 sin espacio en /var/lib/tienda
+2026-09-17T03:39:43-03:00 worker01 tienda-api[3729]: [ERROR] code=E500 excepcion no controlada en /api/clientes
+2026-09-17T03:40:00-03:00 worker01 tienda-api[3729]: [INFO] respaldo diario completado en 12 min
+2026-09-17T03:40:29-03:00 worker01 tienda-api[3729]: [INFO] peticion POST /api/carrito 201 en 88 ms
+2026-09-17T03:40:35-03:00 worker01 tienda-api[3729]: [error] reintento silencioso de la libreria interna (no cuenta como fallo)
+2026-09-17T03:40:49-03:00 worker01 tienda-api[3729]: [WARN] el certificado de tienda.local vence en 12 dias
+2026-09-17T03:41:06-03:00 worker01 tienda-api[3729]: [WARN] cola de trabajos en 480 items
+2026-09-17T03:41:11-03:00 worker01 tienda-api[3729]: [ERROR] code=E503 servicio dependiente sin responder
+2026-09-17T03:42:00-03:00 worker01 tienda-api[3729]: [WARN] memoria del proceso al 87%
+2026-09-17T03:42:51-03:00 worker01 tienda-api[3729]: [INFO] rotacion de log completada
+2026-09-17T03:42:59-03:00 worker01 tienda-api[3729]: [INFO] peticion GET /api/pedidos 200 en 42 ms
