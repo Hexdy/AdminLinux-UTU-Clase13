@@ -1,7 +1,0 @@
-# host;ip;ambiente     (IPs de rango privado, entorno de laboratorio)
-web01;10.20.30.11;prod
-web02;10.20.30.12;prod
-api01;10.20.30.21;prod
-api02;10.20.30.22;staging
-dbnode1;10.20.30.31;prod
-cache01;10.20.30.41;staging

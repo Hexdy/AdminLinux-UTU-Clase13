@@ -1,6 +1,0 @@
-Notas sueltas de la guardia (esto NO es un log, es un .txt).
-
-- Ojo: las lineas que cuentan son las que tienen el nivel [ERROR] con corchetes.
-- Vi lineas tipo '[error]' en minuscula: son ruido de una libreria, no fallos.
-- Tambien hay [INFO] que mencionan la palabra ERROR en un resumen. No son fallos.
-- Este archivo NO es un .log: si tu bucle lo procesa, estas contando de mas.

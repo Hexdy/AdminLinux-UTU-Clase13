@@ -1,27 +1,29 @@
 ---
-# armar_reto.yml — Desplegá el material del postmortem de la noche fea.
+# armar_reto.yml — Armá tu banco de trabajo para auditar el servidor mascota.
 # MULTI-DISTRO: Debian/Ubuntu (apt) · Arch (pacman) · Fedora/RHEL (dnf).
 #
-# ESCENARIO (no es hacking, es laburo de SRE): la plataforma de la tienda tuvo una
-# noche fea y te dejaron los logs de TODOS los hosts. Son demasiados para mirarlos a
-# mano: para eso existen los bucles. Este playbook, en un solo paso:
-#   1) Comprueba que tu distro esté soportada.
-#   2) Instala shellcheck con el módulo genérico 'package' (apt, pacman o dnf según tu
-#      distro), envuelto en block/rescue: si no hay sudo o no hay red, avisa y sigue.
-#      OJO: en Fedora/RHEL el paquete se llama 'ShellCheck' (con mayúsculas). Esa es
-#      la trampa multi-distro de esta clase, hermana del cron/cronie/crond.
-#   3) Crea el área de trabajo  datos/reto/logs/          (módulo file).
-#   4) Copia el material del incidente: 10 logs + el ruido + el material viejo.
-#   5) Genera una MISION.txt personalizada con TUS datos  (módulo template + facts).
-#   6) Deja la nota del equipo con permisos 0600 = solo su dueño  (security by design).
-#   7) Te muestra cómo se llama el servicio de CRON EN TU DISTRO
-#      (cron.service en Debian/Ubuntu, cronie.service en Arch, crond.service en Fedora).
+# ESCENARIO (no es hacking, es laburo de sysadmin): heredaste una flota que
+# provisionaba un compañero que ya no está en la empresa. Te dejó el playbook,
+# el inventario y la salida de las dos últimas corridas. La segunda corrida
+# tendría que haber dado TODO en 'ok' y no dio. Ese es el problema.
 #
-# La gracia de Ansible: el MISMO playbook arma el laboratorio en Ubuntu, Arch o
-# Fedora sin que cambies una línea. Y es IDEMPOTENTE: corrélo mil veces, siempre
-# deja el entorno igual (2ª corrida = changed=0).
+# Este playbook, en un solo paso:
+#   1) Comprueba que tu distro esté soportada (assert sobre ansible_os_family).
+#   2) Instala gawk + la librería YAML de Python con el módulo genérico 'package'
+#      (usa apt, pacman o dnf según tu distro) dentro de un block/rescue: si no
+#      podés escalar a root, el playbook NO se rompe, te avisa y sigue.
+#   3) Crea tu banco de trabajo  datos/reto/           (módulo file).
+#   4) Deja la EVIDENCIA en solo lectura (0444)        (módulo copy).
+#   5) Deja el servidor "desordenado" para que lo arregles (copy con force: false,
+#      así una segunda corrida NO te pisa el trabajo).
+#   6) Genera tu MISION.txt personalizada              (módulo template + facts).
+#   7) Deja la nota del equipo en 0600 = solo su dueño (security by design).
 #
-# Con una sola VM alcanza: corre todo contra localhost (grupo [local]).
+# 🔒 Lo que este playbook NO hace, a propósito: no toca /etc, no arranca servicios,
+#    no abre puertos, no borra nada fuera de datos/reto/. Solo deja archivos.
+#
+# Este playbook SÍ es idempotente: corrélo dos veces y la 2ª da changed=0.
+# Fijate cómo está escrito, porque es exactamente lo que te vamos a pedir a vos.
 #
 # ¿No tenés Ansible? Corré primero:   bash comprobar_requisitos.sh
 #
@@ -29,36 +31,24 @@
 #   ansible-playbook armar_reto.yml -l local --check --diff
 # Aplicar de verdad:
 #   ansible-playbook armar_reto.yml -l local
-#   (si al instalar shellcheck te pide contraseña de sudo, agregá  -K)
+#   (si al instalar los paquetes te pide contraseña de sudo, agregá  -K)
 
-- name: Armar el postmortem de la noche fea (Debian/Ubuntu + Arch + Fedora)
+- name: Armar el banco de trabajo del reto (Debian/Ubuntu + Arch + Fedora)
   hosts: local
   become: false
 
   vars:
-    # true = instala shellcheck (necesita sudo; agregá -K si te pide contraseña).
-    # Poné false si no querés usar sudo: el reto se resuelve igual sin shellcheck.
-    instalar_shellcheck: true
+    # true = instala las herramientas (necesita sudo; agregá -K si te pide clave).
+    # Poné false si ya las tenés o no querés usar sudo.
+    instalar_paquetes: true
     area: "{{ playbook_dir }}/../datos/reto"
-    # LA TRAMPA DE LA CLASE: el MISMO servicio, distinto nombre según la familia.
-    unit_cron: >-
-      {{ 'cron.service' if ansible_os_family == 'Debian'
-         else ('cronie.service' if ansible_os_family == 'Archlinux' else 'crond.service') }}
-    # Y el mismo paquete, distinta forma de escribirlo (Fedora usa CamelCase).
-    paquete_shellcheck: "{{ 'ShellCheck' if ansible_os_family == 'RedHat' else 'shellcheck' }}"
-    # El material del incidente. Ojo con "app viejo.log": tiene un ESPACIO a propósito.
-    logs_incidente:
-      - api01.log
-      - api02.log
-      - app viejo.log
-      - batch01.log
-      - cache01.log
-      - dbnode1.log
-      - web01.log
-      - web02.log
-      - worker01.log
-      - worker02.log
-      - notas.txt
+
+    # La librería YAML de Python se llama DISTINTO en cada familia. Este mapa es
+    # la forma prolija de resolverlo: una sola tarea, tres nombres posibles.
+    paquete_yaml:
+      Debian: python3-yaml
+      Archlinux: python-yaml
+      RedHat: python3-pyyaml
 
   pre_tasks:
     # Si tu distro no es de estas 3 familias, el playbook se detiene ACÁ y te lo
@@ -70,58 +60,89 @@
         fail_msg: >-
           Distro no soportada: {{ ansible_distribution }}
           (familia {{ ansible_os_family }}). Este material corre en Debian/Ubuntu
-          (gestor apt), Arch (gestor pacman) y Fedora/RHEL (gestor dnf). Bash, logger
-          y la sintaxis del crontab son idénticos en las tres.
+          (gestor apt), Arch (gestor pacman) y Fedora/RHEL (gestor dnf).
         success_msg: >-
-          Distro soportada: {{ ansible_distribution }} ({{ ansible_os_family }}).
+          Distro soportada: {{ ansible_distribution }} ({{ ansible_os_family }}) ·
+          librería YAML = {{ paquete_yaml[ansible_os_family] }}.
         quiet: true
 
-    # UN solo módulo, TRES gestores: 'package' elige apt / pacman / dnf por vos.
-    # block/rescue: si falla (sin sudo, sin red, repos rotos) NO te tira el
-    # laboratorio abajo — te avisa y seguís, que el reto no necesita shellcheck.
-    - name: Instalar shellcheck de forma tolerante a fallos
-      when: instalar_shellcheck | bool
+    # block/rescue = "intentá esto; si falla, hacé esto otro". Instalar necesita
+    # sudo y en un aula eso no siempre está: si falla, seguimos igual porque la
+    # evidencia se lee con herramientas que ya tenés.
+    - name: Instalar las herramientas de auditoría (tolerante a fallos)
+      when: instalar_paquetes | bool
       block:
-        - name: Instalar shellcheck (el mismo módulo usa apt, pacman o dnf según tu distro)
+        - name: Instalar gawk + librería YAML (package elige apt, pacman o dnf)
           ansible.builtin.package:
-            name: "{{ paquete_shellcheck }}"
+            name:
+              - gawk
+              - "{{ paquete_yaml[ansible_os_family] }}"
             state: present
-          become: true
+          become: true          # MENOR PRIVILEGIO: sudo solo en ESTA tarea
       rescue:
-        - name: Avisar que no se pudo instalar (y seguir igual)
+        - name: Avisar que seguimos sin instalar nada
           ansible.builtin.debug:
             msg: >-
-              No pude instalar {{ paquete_shellcheck }} ({{ ansible_os_family }}).
-              Seguimos igual: el reto se resuelve con bash, grep, sort y uniq, que ya
-              vienen en cualquier distro. shellcheck es un lujo para revisar tu script:
-              si lo querés, instalalo a mano y volvé a correr.
+              No pude instalar los paquetes (¿sin sudo?). Sigo igual: la evidencia
+              se lee con grep/awk/sort, que ya vienen en tu sistema. Si querés
+              instalarlos a mano:
+              {{ 'sudo apt install gawk python3-yaml' if ansible_os_family == 'Debian'
+                 else ('sudo pacman -S --needed gawk python-yaml' if ansible_os_family == 'Archlinux'
+                 else 'sudo dnf install gawk python3-pyyaml') }}
 
   tasks:
-    - name: Crear el área de trabajo del postmortem
+    - name: Crear el banco de trabajo
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         mode: '0755'
       loop:
         - "{{ area }}"
-        - "{{ area }}/logs"
-        - "{{ area }}/logs/viejos"
+        - "{{ area }}/evidencia"
+        - "{{ area }}/plantillas"
+        - "{{ area }}/servidor"
+        - "{{ area }}/servidor/etc"
 
-    - name: Copiar el material del incidente (10 logs + el ruido)
+    # La evidencia va en SOLO LECTURA (0444): no se toca, se lee. Si la editás,
+    # dejás de poder responder. force: true = siempre la versión original.
+    - name: Dejar la evidencia de la guardia anterior (solo lectura)
       ansible.builtin.copy:
-        src: "{{ playbook_dir }}/reto/logs/{{ item }}"
-        dest: "{{ area }}/logs/{{ item }}"
-        mode: '0644'
-      loop: "{{ logs_incidente }}"
+        src: "{{ playbook_dir }}/reto/{{ item.src }}"
+        dest: "{{ area }}/evidencia/{{ item.dest }}"
+        mode: '0444'
+      loop:
+        - { src: 'corrida_1.txt', dest: 'corrida_1.txt' }
+        - { src: 'corrida_2.txt', dest: 'corrida_2.txt' }
+        - { src: 'inventario_reto.ini', dest: 'inventario_reto.ini' }
+        - { src: 'servidor/etc/hosts_extra', dest: 'hosts_extra_original' }
 
-    # Este NO es parte del incidente: es el material del año pasado. Está acá a
-    # propósito, para que te des cuenta de que 'grep -r' se lo come.
-    - name: Copiar el material VIEJO (el del año pasado, que no cuenta)
+    - name: Dejar el playbook heredado (el que vas a auditar y reescribir)
       ansible.builtin.copy:
-        src: "{{ playbook_dir }}/reto/logs/viejos/web01_2025.log"
-        dest: "{{ area }}/logs/viejos/web01_2025.log"
+        src: "{{ playbook_dir }}/reto/provisionar_reto.yml"
+        dest: "{{ area }}/provisionar_reto.yml"
         mode: '0644'
 
+    - name: Dejar la configuración base del equipo (la fuente de verdad)
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/plantillas/app.conf.base"
+        dest: "{{ area }}/plantillas/app.conf.base"
+        mode: '0644'
+
+    # force: false = "si el archivo ya existe, dejalo como está". Así, cuando
+    # arregles el servidor con TU playbook y vuelvas a correr éste, no te pisa
+    # el trabajo. Sigue siendo idempotente: si ya está, reporta 'ok'.
+    - name: Dejar el servidor tal como lo encontraste (sin pisar tu trabajo)
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/reto/servidor/etc/{{ item }}"
+        dest: "{{ area }}/servidor/etc/{{ item }}"
+        mode: '0644'
+        force: false
+      loop:
+        - app.conf
+        - hosts_extra
+
+    # OJO: la plantilla usa SOLO datos estables (hostname, distro). Si le metieras
+    # la fecha, cada corrida daría 'changed' y el playbook dejaría de ser idempotente.
     - name: Generar TU misión personalizada (módulo template + facts)
       ansible.builtin.template:
         src: "{{ playbook_dir }}/templates/mision.txt.j2"
@@ -135,45 +156,34 @@
         mode: '0600'
 
   post_tasks:
-    # "Verificar antes de confiar": mostramos cuánto material quedó listo.
-    # changed_when: false -> leer NO es cambiar (idempotencia).
-    - name: Contar los archivos del incidente
-      ansible.builtin.find:
-        paths: "{{ area }}/logs"
-        patterns: '*.log'
-        recurse: false
-      register: hallados
-      changed_when: false
-
-    # Solo LEE el estado de cron en tu máquina. No arranca ni habilita nada.
-    - name: Ver cómo se llama (y cómo está) el servicio de CRON EN TU DISTRO
+    # "Verificar antes de confiar": mostramos cuánta evidencia quedó lista.
+    # changed_when: false porque esto SOLO LEE. Sin eso, la tarea diría 'changed'
+    # en cada corrida y arruinaría la idempotencia del playbook.
+    - name: Contar las líneas de evidencia
       ansible.builtin.command:
-        cmd: "systemctl is-enabled {{ unit_cron }}"
+        cmd: "wc -l {{ area }}/evidencia/corrida_1.txt {{ area }}/evidencia/corrida_2.txt"
       changed_when: false
-      failed_when: false
-      register: cron_estado
+      register: conteo
 
     - name: Mostrar la misión
       ansible.builtin.debug:
         msg:
           - "==============================================================="
-          - "  Material listo en:  datos/reto/logs/     (abrí MISION.txt)"
-          - "  Archivos *.log en la carpeta (sin contar viejos/): {{ hallados.matched }}"
-          - "  En {{ ansible_distribution }} el cron se llama '{{ unit_cron }}'
-             y está: {{ cron_estado.stdout | default('sin dato') }}"
+          - "  Banco de trabajo listo en:  datos/reto/   (abrí MISION.txt)"
+          - "  {{ conteo.stdout_lines | join('  |  ') }}"
           - "---------------------------------------------------------------"
-          - "  Sos el SRE de guardia. ESCRIBÍ UN SCRIPT con un bucle y una"
-          - "  función que conteste estas 3 preguntas, y armá la bandera con"
-          - "  este formato EXACTO:"
-          - "      BANDERA{<R1>-<R2>-<R3>}"
+          - "  PARTE A (obligatoria): reescribí el playbook heredado para que"
+          - "  sea IDEMPOTENTE y dejá el servidor en el estado deseado."
+          - "      cp provisionar_reto.yml mi_provisionar.yml   # y arreglalo"
+          - "      ansible-playbook mi_provisionar.yml -l local  # 2 veces"
+          - "  La 2ª corrida tiene que dar  changed=0 ."
           - ""
-          - "  R1) Total de líneas con el nivel [ERROR] exacto, sumando TODOS"
-          - "      los *.log de datos/reto/logs/ (sin entrar a viejos/)."
-          - "  R2) ¿Qué archivo juntó MÁS [ERROR]? (sin la extensión .log)"
-          - "  R3) Dentro de ESE archivo, ¿cuántas veces aparece el code=EXXX"
-          - "      más repetido?"
+          - "  PARTE B: sacá las 3 respuestas de la evidencia y armá:"
+          - "      BANDERA{<host_con_desvio>-<tareas_no_idempotentes>-<lineas_duplicadas>}"
           - ""
-          - "  Verificá tu bandera con Ansible (el repo NO la guarda en texto"
-          - "  plano, solo su huella SHA-256):"
-          - "     ansible-playbook comprobar_bandera.yml -e \"bandera=BANDERA{...}\""
+          - "  Auditá tu trabajo:"
+          - "      ansible-playbook auditar_idempotencia.yml -l local"
+          - "  Verificá tu bandera (el repo NO la guarda en texto plano, solo"
+          - "  su huella SHA-256):"
+          - "      ansible-playbook comprobar_bandera.yml -e \"bandera=BANDERA{...}\""
           - "==============================================================="

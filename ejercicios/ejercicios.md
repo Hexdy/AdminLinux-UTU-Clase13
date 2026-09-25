@@ -1,78 +1,194 @@
-# Ejercicios — Clase 13
+# Ejercicios — Clase 13 (Ansible e Infraestructura como Código)
 
-Practicá en **tu VM** (nada de esto necesita `sudo`, salvo lo que diga) y sobre los
-archivos de `datos/`. Las soluciones están en `soluciones.md`, pero **intentá primero**.
+> Todo se hace en tu VM, contra `localhost`, dentro de una carpeta de juego.
+> No necesitás otra máquina ni tocar nada del sistema.
 
-> 🧪 Antes de correr cualquier script: `bash -n script.sh` (sintaxis) y
-> `shellcheck script.sh` (vicios). Para depurar, `bash -x script.sh`.
-> Todos los scripts arrancan con `#!/usr/bin/env bash` + `set -euo pipefail` (Clase 12).
-
-## Bucles
-
-**1. `for` sobre un glob.**
-Escribí `contar.sh` que recorra **todos** los `*.log` de `datos/` y para cada uno imprima,
-alineado con `printf`, el nombre del archivo y su cantidad de líneas. Después contestá:
-¿qué pasa si en `datos/` no hay ningún `.log`? ¿Cómo lo blindás?
-
-**2. `while read` salteando comentarios.**
-`datos/servicios.txt` tiene un servicio por línea, con comentarios (`#`) y alguna línea
-vacía. Escribí `estado.sh` que recorra el archivo **línea por línea** y para cada servicio
-real muestre `servicio: activo|inactivo` usando `systemctl is-active`. Los comentarios y
-las vacías se saltean con `continue`.
-
-**3. El bug del subshell.**
-Este script imprime `total=0` aunque `datos/app_demo.log` tenga 40 líneas. Explicá **por
-qué** y arreglalo **sin** usar `wc -l`.
+Preparate un sandbox:
 
 ```bash
-total=0
-cat datos/app_demo.log | while read -r linea; do
-    total=$((total + 1))
-done
-echo "total=$total"
+mkdir -p ~/lab-ansible/banco && cd ~/lab-ansible
 ```
 
-**4. Campos separados por `;`.**
-`datos/hosts.txt` tiene `host;ip;ambiente`. Escribí `prod.sh` que muestre **solo** los
-hosts de ambiente `prod`, en una tabla alineada `HOST | IP`. Pista: `IFS=';'` en el `read`.
+Y acordate de la costumbre de la casa: **`--check --diff` primero, aplicar después.**
 
-## Arrays y funciones
+---
 
-**5. Arrays.**
-Cargá `datos/servicios.txt` en un array con `mapfile -t`, imprimí **cuántos** elementos
-tiene, el **primero**, el **último**, y después recorrelo con un `for` mostrando solo los
-que **no** empiezan con `#`.
+## 1. Tu primer playbook (calentamiento)
 
-**6. Funciones (`local`, `return` vs `echo`).**
-Escribí una función `contar_nivel <archivo> <nivel>` que devuelva **cuántas líneas** de ese
-archivo tienen ese nivel entre corchetes (`[ERROR]`, `[WARN]`, `[INFO]`). Usala en un bucle
-sobre `datos/app_demo.log` para los tres niveles.
-Después respondé: si en vez de `echo` usaras `return "$n"`, ¿qué pasaría con un archivo de
-**500** errores? ¿Y qué pasa si dentro de la función te olvidás el `local`?
+Escribí `01_hola.yml` que, sobre `hosts: localhost`:
 
-**7. `trap` + `mktemp`.**
-Escribí `reporte.sh` que arme un reporte en un archivo temporal creado con `mktemp`, lo
-muestre ordenado y **lo borre siempre** al salir: termine bien, termine mal o lo cortes con
-`Ctrl+C`. Probá las tres salidas y verificá con `ls /tmp` que no quedó basura.
+1. Muestre por pantalla la distribución y la familia del sistema
+   (pista: `ansible.builtin.debug` + los facts `ansible_distribution` y `ansible_os_family`).
+2. Cree el directorio `~/lab-ansible/banco/etc` con modo `0755`.
 
-## `logger` + `cron` + seguridad
+Corrélo **dos veces**. ¿Qué diferencia ves en el `PLAY RECAP`? Escribila.
 
-**8. Que deje rastro y corra solo (y que sea seguro).**
-a) Agregale al script del ejercicio 6 una función `log()` que escriba **a la pantalla
-(stderr) y al journal** con `logger -t clase13`. Verificá con
-`journalctl -t clase13 -n 10 --no-pager`.
-b) Escribí la línea de `crontab` que lo corra **de lunes a viernes a las 07:15**, con ruta
-absoluta y la salida redirigida a un log propio.
-c) Una IA te propone esta línea. Marcá **tres** problemas y corregilos:
+---
 
-```
-15 7 * * 1-5 mi_reporte.sh > /tmp/reporte-$(date +%F).txt
+## 2. Idempotencia: el experimento que hay que hacer una vez en la vida
+
+Creá `agrega.sh` con una sola línea:
+
+```bash
+echo "servidor=10.0.10.20" >> ~/lab-ansible/banco/etc/app.conf
 ```
 
-d) ¿Qué permisos le ponés al script y por qué **no** `777`? Si el script necesitara un
-token de una API, ¿dónde lo guardás?
+Corrélo **tres** veces y mirá el archivo (`cat`). Después escribí `02_estado.yml`
+que consiga **lo mismo** pero con `ansible.builtin.lineinfile` (con `create: true`).
+Corrélo tres veces y volvé a mirar.
 
-> 🤖 Si te trabás, pedile a la IA que te explique el bucle **línea por línea** y verificá
-> con `head`/`less` sobre **un** archivo antes de confiar en el total. Y si te escribe un
-> `rm` dentro de un `for`, **cambiá el `rm` por un `echo`** y mirá qué se expande antes de
-> ejecutarlo de verdad.
+**Contestá en dos líneas:** ¿por qué el script te deja el archivo así y el playbook no?
+
+---
+
+## 3. De `command` a módulo (el corazón del reto)
+
+Esta tarea está mal escrita a propósito:
+
+```yaml
+- name: Crear el directorio de datos
+  ansible.builtin.command: mkdir -p /home/{{ ansible_user_id }}/lab-ansible/banco/datos
+```
+
+1. Corré el playbook dos veces. ¿Qué dice la segunda corrida?
+2. Reescribila con el módulo correcto y volvé a correr dos veces.
+3. **Bonus:** si por alguna razón tuvieras que dejar el `command`, ¿qué parámetro le
+   agregarías para que la segunda corrida **no** diga `changed`? Hay **dos** respuestas
+   válidas; nombrá las dos y explicá cuándo usarías cada una.
+
+---
+
+## 4. Plantilla Jinja2 con variables
+
+Armá `plantillas/app.conf.j2`:
+
+```
+# generado por Ansible, no editar a mano
+listen = {{ puerto_app }}
+modo   = {{ entorno }}
+host   = {{ ansible_hostname }}
+```
+
+Y un playbook `03_plantilla.yml` con `vars:` (`puerto_app: 8080`, `entorno: produccion`)
+que la renderice a `~/lab-ansible/banco/etc/app.conf` con modo `0640`.
+
+1. Corrélo dos veces. ¿Da `changed=0` la segunda?
+2. Cambiá `puerto_app` a `9090` y corré con `--check --diff`. ¿Qué te muestra el `--diff`?
+3. **Trampa a propósito:** agregale a la plantilla una línea con la fecha
+   (`{{ ansible_date_time.iso8601 }}`), corré dos veces y mirá el `PLAY RECAP`.
+   ¿Qué rompiste? Sacala después.
+
+---
+
+## 5. Handlers: reiniciar solo cuando hace falta
+
+Ampliá `03_plantilla.yml`:
+
+- Agregale `notify: Avisar que cambio la config` a la tarea del `template`.
+- Agregá un bloque `handlers:` con esa tarea, que solo haga un `debug` con el mensaje
+  `"Aca reiniciaria el servicio"`.
+
+Corrélo dos veces seguidas y después cambiando una variable. **Contestá:** ¿cuántas
+veces corrió el handler y por qué no corre siempre?
+
+---
+
+## 6. Menor privilegio
+
+Escribí un playbook que instale el paquete `tree` usando `ansible.builtin.package`.
+
+1. Corrélo **sin** `become`. ¿Qué error te da?
+2. Poné `become: true` **solo en esa tarea** (no a nivel del play) y corré con `-K`.
+3. **Contestá:** ¿por qué está mal poner `become: true` arriba de todo "por las dudas"?
+
+---
+
+## 7. Multi-distro sin `if` a mano
+
+Escribí un playbook que muestre el **nombre correcto del paquete de la librería YAML
+de Python** según la familia del sistema, usando un diccionario de variables:
+
+```yaml
+  vars:
+    paquete_yaml:
+      Debian: python3-yaml
+      Archlinux: python-yaml
+      RedHat: python3-pyyaml
+```
+
+Pista: `{{ paquete_yaml[ansible_os_family] }}`. Después envolvé la instalación en un
+`block:` con `rescue:` que muestre un aviso amigable si no se puede escalar privilegios.
+
+---
+
+## 8. Leer el PLAY RECAP como un profesional
+
+Mirá `playbooks/reto/corrida_1.txt` y `corrida_2.txt` del repo y contestá:
+
+1. ¿Cuántos hosts había en el inventario y cuántos contestaron?
+2. ¿Qué significa que uno aparezca como `unreachable`? ¿Es culpa del playbook?
+3. ¿Por qué en la primera corrida **todos** los hosts tienen `changed` alto y eso
+   **no** es un problema?
+4. ¿Qué te dice un `changed` en la **segunda** corrida? Nombrá las **dos** causas posibles.
+
+---
+
+## 9. Un rol mínimo
+
+Convertí tu `03_plantilla.yml` en un rol:
+
+```
+roles/
+  app_demo/
+    defaults/main.yml      <- puerto_app y entorno (valores por defecto)
+    tasks/main.yml         <- las tareas
+    templates/app.conf.j2  <- la plantilla
+    handlers/main.yml      <- el handler
+```
+
+Y un `sitio.yml` que lo use:
+
+```yaml
+- hosts: localhost
+  roles:
+    - app_demo
+```
+
+**Contestá:** ¿qué ganás al partirlo así? Nombrá dos ventajas concretas.
+
+---
+
+## 10. Seguridad y criterio
+
+1. Un compañero te pasa este playbook. Marcá **tres** cosas mal y explicá cada una:
+
+   ```yaml
+   - hosts: all
+     become: true
+     vars:
+       db_password: "sup3rS3cr3t0"
+     tasks:
+       - name: config
+         ansible.builtin.shell: chmod 777 /opt/app && cp app.conf /opt/app/
+   ```
+
+2. ¿Qué mecanismo tiene Ansible para guardar datos sensibles **cifrados** dentro del
+   repo? ¿Y cuál es la regla mínima aunque no lo uses?
+3. Corrés el playbook de producción un lunes y una tarea que siempre daba `ok` ahora da
+   `changed`. **¿Qué sospechás y cómo lo confirmás?**
+4. ¿En qué caso **no** usarías Ansible y te alcanzaría un script? Dame un ejemplo concreto.
+
+---
+
+## 11. IA con criterio
+
+Pedile a un asistente de IA: *"escribime una tarea de Ansible que se asegure de que el
+usuario `deploy` exista con shell `/bin/bash` y pertenezca al grupo `docker`"*.
+
+Después, **antes de correr nada**:
+
+1. Verificá cada parámetro con `ansible-doc ansible.builtin.user`. ¿Existen todos?
+2. ¿Le puso `become: true`? ¿Hace falta?
+3. Corrélo con `--check --diff` y recién después decidí.
+
+**Contestá:** ¿qué te inventó, si te inventó algo?

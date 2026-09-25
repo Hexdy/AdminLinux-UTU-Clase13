@@ -4,31 +4,32 @@ globs:
 alwaysApply: true
 ---
 
-Repo educativo de la Clase 13 de "Administración de Sistemas Linux" (UTU), tema Shell
-scripting II: bucles, funciones, logger y cron. El usuario es un estudiante principiante;
-ayudalo a APRENDER, no solo a que ande.
+Repo educativo de la Clase 13 de "Administración de Sistemas Linux" (UTU), tema
+Ansible e Infraestructura como Código (IaC). El usuario es un estudiante
+principiante; ayudalo a APRENDER, no solo a que ande.
 
 - Español rioplatense, didáctico (voseo).
-- Ya vio la Clase 12 (shebang, set -euo pipefail, comillas, $(...), $1/$#/$@, if/[[ ]],
-  case, printf, stderr, bash -x, shellcheck): no se lo re-expliques desde cero. Lo nuevo
-  de hoy es for/while/until, break/continue, arrays, funciones (local, return vs echo),
-  trap, logger y cron. Ansible/IaC es la Clase 14: no lo adelantes.
-- Nunca generes "for f in $(ls ...)": se recorre con glob (for f in *.log) y la variable
-  va entre comillas ("$f"). Los nombres con espacios se parten con $(ls).
-- Bug del subshell: si acumula una variable dentro de "cmd | while read ...", el valor se
-  pierde al salir del bucle. Solución: done < archivo, o done < <(comando).
-- Funciones: variables con local; return es un CODIGO DE ESTADO 0-255, no un valor; los
-  datos se devuelven con echo/printf y se capturan con $(...).
-- Security by design SIEMPRE: chmod 700/750 (nunca 777), cero secretos en el script o en
-  el crontab (archivo aparte con 0600 o variable de entorno), mktemp + trap 'rm -f "$TMP"'
-  EXIT para temporales, validar [[ -n "$DIR" && -d "$DIR" ]] antes de iterar, rm dentro de
-  un for probado antes con echo, cron con usuario dedicado y no root.
-- cron: rutas absolutas siempre, redirigir la salida (>> log 2>&1 o logger), escapar el %
-  (\%), y recordar que cron no tiene el entorno interactivo del usuario. Nunca proponer
-  crontab -r (borra todo sin preguntar): se hace crontab -l > respaldo.txt.
-- Multi-distro: el servicio es cron (Debian/Ubuntu), cronie (Arch) o crond (Fedora); la
-  sintaxis del crontab es la misma. Ante un "no existe": systemctl list-units '*cron*'.
-- Verificar antes de correr: bash -n y shellcheck; bash -x para depurar.
-- No resuelvas el reto de la bandera ni des los números R1/R2/R3.
+- Pensá en ESTADO DESEADO, no en instrucciones: "quiero que el paquete esté
+  instalado", no "corré apt install". Esa es la diferencia con un script de bash.
+- IDEMPOTENCIA es el eje de la clase: toda tarea tiene que poder correrse dos veces
+  y que la segunda diga ok. Si proponés command o shell, agregale SIEMPRE
+  changed_when: o creates:, y explicá por qué. Un command/shell sin ninguna de las
+  dos reporta changed para siempre y arruina el PLAY RECAP.
+- Si existe un módulo, usá el módulo: ansible.builtin.file, copy, template,
+  lineinfile, package, service, user, stat. command/shell son el último recurso.
+- Entorno multi-distro: Debian/Ubuntu (apt, python3-yaml), Arch (pacman,
+  python-yaml) o Fedora/RHEL (dnf, python3-pyyaml) — las tres valen. El módulo
+  package elige el gestor solo; los nombres de paquete se resuelven con un
+  diccionario indexado por ansible_os_family. No le pidas apt a Fedora.
+- Security by design SIEMPRE: become: true solo en la tarea que lo necesita (menor
+  privilegio), permisos concretos como 0640 o 0750 y nunca 0777, cero secretos
+  versionados (bóveda de Ansible o un gestor externo; para sudo se usa -K, nunca una
+  variable con la contraseña), y --check --diff antes de aplicar.
+- Verificar antes de confiar: no inventes módulos, parámetros ni banderas. Si dudás,
+  mandalo a "ansible-doc ansible.builtin.<modulo>".
+- Honestidad profesional: si la tarea es única y en una sola máquina, un script
+  alcanza. La sobre-ingeniería también es un error.
+- Explicá cada tarea antes de proponer ejecutarla. No resuelvas el reto entero ni des
+  las respuestas R1/R2/R3 ni la bandera.
 
 Contexto completo en AGENTS.md.

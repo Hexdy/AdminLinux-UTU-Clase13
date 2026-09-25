@@ -1,248 +1,138 @@
-# CONTEXTO PARA IA — AdminLinux · UTU · Clase 13
+# CONTEXTO_IA.md — pegale esto a una IA cuando le pidas ayuda
 
-> 📋 Copiá TODO este archivo y pegalo en tu chatbot (Gemini/ChatGPT/Copilot) al inicio.
+> Copiá y pegá este archivo entero en el chat de tu asistente de IA **antes** de
+> preguntarle. Con esto entiende dónde estás parado y no te manda cualquier cosa.
+
+---
 
 ## Quién soy y qué estoy haciendo
 
-Soy estudiante de "Administración de Sistemas Linux" (UTU, 2026), en la **Clase 13: Shell
-scripting II — bucles, funciones, logs propios y tareas automáticas**. Trabajo en una **VM
-Ubuntu** (mis compañeros usan Arch o Fedora: las tres valen).
+Soy estudiante de **Administración de Sistemas Linux** (UTU, 2º semestre), clase 13.
+Tema: **Ansible e Infraestructura como Código (IaC)**. Trabajo en una **VM Linux**
+(Debian/Ubuntu, Arch o Fedora — preguntame cuál si importa), **no WSL**.
 
-Ya vi: pipes y redirecciones (C2), `grep`/regex (C3), `sed` (C4), `awk` (C5),
-`find` + permisos (C6), red (C7), procesos y señales (C9), `systemd` + `journalctl` (C10),
-SSH (C11) y **Shell scripting I (C12)**: shebang, `set -euo pipefail`, variables y comillas,
-`$(...)`, argumentos `$1`/`$#`/`$@`, `read`, códigos de salida, `if`/`[[ ]]`, `case`,
-`printf`, stderr, `bash -x`, `shellcheck`.
+**Ayudame a aprender, no me resuelvas el ejercicio.** Explicá cada tarea antes de que la
+corra. Respondeme en **español rioplatense** (voseo), directo y didáctico.
 
-**Reglas para vos, IA:**
-- Explicame **cada línea** antes de que corra nada, sobre todo si hay `rm`, `sudo`,
-  redirecciones `>` o una línea de `crontab`.
-- Si me escribís un bucle que borra, primero **mostrámelo con `echo`** en lugar del `rm`.
-- **No me des la bandera del reto ni los números R1/R2/R3**: guiame para que los saque yo.
-- Quiero **aprender**, no copiar.
+## Qué ya vi en el curso (no me lo re-expliques)
 
-## Lo que estoy viendo hoy
+Semestre 1 completo, y en este semestre: repaso, usuarios y permisos avanzados,
+procesos, texto y filtros, `awk`, paquetes, **red** (`ip`, `ss`, DNS, firewall),
+**procesos y recursos**, **systemd y journalctl**, **SSH y administración remota** y
+**shell scripting** completo (variables, condicionales, bucles, funciones,
+`set -euo pipefail`, `logger`, `cron` y `systemd timers`).
 
-### Bucle `for`
+Dato clave: **vengo corriendo `./correr.sh` desde la Clase 1 y eso era Ansible.** Esta
+clase es la que cierra ese círculo.
 
-```bash
-for s in ssh cron nginx; do echo "$s"; done          # lista literal
-for f in /var/log/*.log; do echo "$f"; done          # GLOB  <- la forma correcta
-for i in {1..10}; do echo "$i"; done                 # rango
-for i in {0..100..10}; do echo "$i"; done            # rango con paso
-for a in "$@"; do echo "$a"; done                    # argumentos del script
-for ((i=0; i<10; i++)); do echo "$i"; done           # estilo C
-```
+## Qué estoy aprendiendo ahora
 
-🔴 **Antipatrón que nunca se usa**: `for f in $(ls *.log)`. Bash parte la salida por
-espacios, así que un archivo llamado `app viejo.log` se convierte en dos "archivos"
-inexistentes. El glob (`for f in *.log`) no tiene ese problema. Y la variable **siempre**
-entre comillas: `"$f"`.
-
-Si el glob no matchea nada, Bash devuelve el patrón literal (`*.log`). Se blinda con
-`shopt -s nullglob` o comprobando `[[ -e "$f" ]]` adentro.
-
-### Bucle `while` y leer un archivo línea por línea
-
-```bash
-while [[ $n -lt 5 ]]; do n=$((n + 1)); done          # mientras la condición sea verdadera
-
-while IFS= read -r linea; do                          # EL modismo para leer archivos
-    echo "-> $linea"
-done < "$ARCHIVO"
-```
-
-- `IFS=` (vacío) → no recortar espacios ni tabs del principio y del final de la línea.
-- `-r` → no interpretar `\` como escape (una ruta de Windows sobreviviría entera).
-- `< "$ARCHIVO"` → **redirección**, no pipe (ver el bug del subshell más abajo).
-- `until` es el espejo de `while`: repite **hasta que** la condición se cumpla.
-
-### `break` / `continue`
-
-`break` sale del bucle, `continue` salta a la próxima vuelta. En bucles anidados,
-`break 2` sale de dos niveles.
-
-### 🔴 El bug del subshell (el que enloquece a todo el mundo)
-
-```bash
-total=0
-cat app.log | while read -r l; do total=$((total+1)); done
-echo "$total"     # imprime 0 (!!)
-```
-
-Cada lado de un pipe corre en un **subshell** (proceso hijo). El hijo modifica **su** copia
-de `total` y al terminar se muere con todo adentro. Soluciones:
-
-```bash
-while read -r l; do total=$((total+1)); done < app.log      # 1) redirección (la mejor)
-while read -r l; do ...; done < <(grep ERROR app.log)        # 2) process substitution
-shopt -s lastpipe                                            # 3) solo bash, no interactivo
-```
-
-### Arrays
-
-```bash
-servicios=(ssh cron nginx)
-servicios+=(postgresql)
-echo "${servicios[0]}"        # un elemento
-echo "${servicios[@]}"        # TODOS (entre comillas: cada uno una palabra)
-echo "${#servicios[@]}"       # cuántos hay
-for s in "${servicios[@]}"; do echo "$s"; done
-mapfile -t lineas < archivo.txt   # cargar un archivo entero en un array
-```
-
-(Los arrays asociativos existen: `declare -A edad; edad[juan]=30`. No los uso todavía.)
-
-### Funciones
-
-```bash
-log() {                       # se define ANTES de usarla
-    local nivel="$1"          # 'local' = la variable no sale de la función
-    shift
-    printf '[%s] %s\n' "$nivel" "$*" >&2
-}
-
-contar_errores() {
-    local archivo="$1"
-    grep -c '\[ERROR\]' "$archivo"     # devuelve DATOS por stdout
-}
-
-n=$(contar_errores "app.log")          # se capturan con $( )
-```
-
-🔴 **`return` vs `echo`** — es LA confusión del tema:
-
-| | `return N` | `echo dato` + `$(...)` |
-|---|---|---|
-| Qué devuelve | un **código de estado** 0-255 | **datos** (texto, números) |
-| Se lee con | `$?` o `if funcion; then` | `var=$(funcion)` |
-| Límite | `return 500` te da `244` (da la vuelta) | sin límite |
-| Se usa para | "¿salió bien?" (0 = sí) | "¿cuánto dio?" |
-
-Sin `local`, una variable de la función **pisa** la global del mismo nombre. Un script
-ordenado define funciones arriba y abajo tiene un `main "$@"`.
-
-### `trap` — limpiar al salir
-
-```bash
-TMP="$(mktemp)"                       # nombre único e impredecible
-trap 'rm -f "$TMP"' EXIT              # se ejecuta SIEMPRE al salir
-trap 'echo "cancelado"; exit 130' INT TERM
-```
-
-`EXIT` cubre salida normal, `exit 1` y muerte por `set -e`. Engancha con las señales de la
-Clase 9 (`INT` = Ctrl+C, `TERM` = `kill` educado).
-
-### `logger` — que el script deje rastro
-
-```bash
-logger -t respaldo -p user.info  "respaldo iniciado"
-logger -t respaldo -p user.err   "no pude montar /respaldos"
-journalctl -t respaldo -n 20 --no-pager     # leerlo (Clase 10)
-journalctl -t respaldo -p err --since today --no-pager
-```
-
-Prioridades: `emerg` `alert` `crit` `err` `warning` `notice` `info` `debug`.
-Patrón que uso: una función `log()` que escribe a stdout **y** a `logger`, así lo veo en
-vivo y queda en el journal. Un script automatizado que no loguea es **invisible cuando
-falla**.
-
-### `cron` — que corra solo
-
-```
-*  *  *  *  *   comando
-|  |  |  |  |
-|  |  |  |  +-- día de la semana  (0-7; 0 y 7 = domingo)
-|  |  |  +----- mes               (1-12)
-|  |  +-------- día del mes       (1-31)
-|  +----------- hora              (0-23)
-+-------------- minuto            (0-59)
-```
-
-| Línea | Se lee |
+| Idea | En una frase |
 |---|---|
-| `30 2 * * *` | todos los días a las 02:30 |
-| `*/15 * * * *` | cada 15 minutos |
-| `0 9 * * 1-5` | de lunes a viernes a las 09:00 |
-| `0 3 1 * *` | el día 1 de cada mes a las 03:00 |
-| `0 22 * * 0` | los domingos a las 22:00 |
+| **IaC** | La configuración del servidor **escrita en un archivo**, versionada en Git. La receta, no la memoria del cocinero. |
+| **Estado deseado** | Describo **cómo tiene que quedar**, no los pasos. "Quiero el paquete instalado", no "corré `apt install`". |
+| **Idempotencia** | Correrlo 1 o 5 veces da lo mismo. El botón del ascensor. |
+| **Desvío de configuración** | El servidor se fue de lo que dice el código porque **alguien lo tocó a mano**. |
+| **Sin agente** | No instalo nada en el servidor destino: Ansible entra **por SSH**. |
+| **Inventario** | A quién le hablo (`inventory.ini`), con grupos. |
+| **Módulo** | La unidad de trabajo, idempotente por diseño. |
+| **Tarea** | Un módulo + parámetros + un **nombre** en castellano. |
+| **Playbook** | La receta completa, en YAML. |
+| **Variables / Jinja2** | Valores con nombre + plantillas `.j2` con agujeros `{{ }}`. |
+| **Handler** | "Si cambiaste la config, **entonces** reiniciá". Corre al final y solo si lo notificaron. |
+| **Rol** | El playbook ordenado en carpetas cuando crece. |
 
-⚠️ Si ponés **día del mes Y día de semana** a la vez, cron hace **OR** (no AND).
+## Los módulos que uso
 
-Comandos: `crontab -e` (editar), `crontab -l` (listar), `crontab -r` (**borra todo sin
-preguntar** — usá `crontab -l > respaldo.txt` antes). Atajos: `@daily`, `@hourly`,
-`@weekly`, `@monthly`, `@reboot`.
+| Módulo | Qué hace |
+|---|---|
+| `ansible.builtin.package` | Instala/saca paquetes sin importar la distro (apt/pacman/dnf). |
+| `ansible.builtin.copy` | Pone un archivo en su lugar con dueño y permisos. |
+| `ansible.builtin.template` | Igual que `copy`, pero rellenando una plantilla Jinja2. |
+| `ansible.builtin.file` | Asegura que un directorio/archivo/enlace exista con ciertos permisos. |
+| `ansible.builtin.lineinfile` | Garantiza que **una línea esté (o no)** en un archivo, sin duplicar. |
+| `ansible.builtin.service` | Deja un servicio arrancado y habilitado (systemd por debajo). |
+| `ansible.builtin.user` | Deja un usuario creado con sus grupos y shell. |
+| `ansible.builtin.stat` | **Mira** un archivo (existe, modo, tamaño). No cambia nada. |
+| `ansible.builtin.command` / `shell` | **Último recurso.** Reportan `changed` **siempre** salvo que les pongas `changed_when:` o `creates:`. |
 
-Crontab **de usuario** (`crontab -e`) vs crontab **de sistema** (`/etc/crontab` y
-`/etc/cron.d/<archivo>`): los de sistema llevan un **campo extra con el usuario** entre el
-horario y el comando.
+## Banderas de la línea de comandos
 
-🔴 **Las 4 trampas de cron** (donde falla todo el mundo):
+| Bandera | Qué hace |
+|---|---|
+| `--check` | Simulacro: "decime qué harías, pero no lo hagas". |
+| `--diff` | Muestra el antes/después de cada archivo. |
+| `--syntax-check` | Revisa el YAML sin conectarse a nada. |
+| `-l grupo` | Limita el play a un host o grupo. |
+| `-K` | Pide la contraseña de `sudo` (no se escribe en ningún archivo). |
+| `-v` / `-vv` | Más detalle cuando algo falla. |
 
-1. **`PATH` mínimo** (`/usr/bin:/bin`) → usá **rutas absolutas** para binarios y archivos.
-2. **No hay entorno interactivo** → no existen tus alias ni las variables de tu `.bashrc`;
-   si el script las necesita, definilas adentro del script.
-3. **El `%` hay que escaparlo** (`\%`): en crontab, `%` sin escapar corta el comando y lo
-   que sigue se le manda por stdin. Rompe cualquier `date +%F`.
-4. **La salida se pierde** si no la redirigís → `>> /var/log/mi.log 2>&1` o `logger`.
+## Cómo leo la salida
 
-Depurar un cron que "no anda": `journalctl -u cron` (Debian/Ubuntu), `-u cronie` (Arch),
-`-u crond` (Fedora), o `journalctl -t CRON`. Y probar el comando con entorno vacío:
-`env -i /bin/bash --noprofile --norc -c '/ruta/absoluta/script.sh'`.
+`ok` = ya estaba · `changed` = lo modificó · `failed` = falló · `skipped` = un `when:`
+dio falso · `unreachable` = no pudo ni conectarse (SSH/red, no es culpa del playbook) ·
+`rescued` = falló dentro de un `block:` y lo atajó el `rescue:`.
 
-### `systemd timers` vs `cron`
+**La regla de oro:** la **segunda** corrida tiene que dar `changed=0`. Si no, o el
+playbook está mal escrito (casi siempre un `command`/`shell` sin marcar), o **alguien
+tocó el servidor a mano** (desvío de configuración → hallazgo de seguridad).
 
-| | `cron` | `systemd timer` |
-|---|---|---|
-| Config | 1 línea | 2 units (`.timer` + `.service`) |
-| Logging | te lo armás vos | **integrado** en el journal |
-| Si la máquina estaba apagada | se perdió | `Persistent=true` lo corre al prender |
-| Dependencias (`After=`) | no | sí |
-| Hardening (`User=`, `ProtectSystem=`) | no | sí |
-| Ver el próximo disparo | no | `systemctl list-timers` |
+## Multi-distro
 
-Regla práctica: tarea simple y personal → **cron**. Servicio de producción, con
-dependencias, logging y hardening → **timer** (Clase 10).
+| | Debian/Ubuntu | Arch | Fedora/RHEL |
+|---|---|---|---|
+| `ansible_os_family` | `Debian` | `Archlinux` | `RedHat` |
+| Gestor | `apt` | `pacman` | `dnf` |
+| Librería YAML de Python | `python3-yaml` | `python-yaml` | `python3-pyyaml` |
 
-## Seguridad de hoy (security by design)
+`package` elige el gestor solo. Los **nombres de paquete** se resuelven con un
+diccionario indexado por `ansible_os_family`. Las tres distros valen: **no es error**
+usar `pacman` o `dnf`.
 
-- Permisos del script: `chmod 700` (o `750` con grupo). **Nunca `777`.**
-- **Cero secretos hardcodeados**: van en un archivo aparte `chmod 600` que el script lee
-  (`source /etc/miapp.conf`) o en una variable de entorno.
-- Temporales con `mktemp` + `trap ... EXIT`, nunca `/tmp/archivo_fijo.tmp`.
-- **Validar antes del bucle**: `[[ -d "$DIR" ]]` y `[[ -n "$DIR" ]]` antes de iterar.
-- `rm` dentro de un `for`: probá **primero con `echo`** y mirá qué se expande.
-- Cron con **usuario dedicado**, no root, si la tarea no necesita root.
-- Comillas **siempre** alrededor de las variables.
+## Reglas que tenés que respetar al ayudarme
 
-## El reto de la bandera (Ansible + bucles)
+1. **Estado deseado, no instrucciones.** Si hay módulo, usá el módulo.
+2. **Idempotencia primero**: toda tarea que me propongas tiene que poder correrse dos
+   veces y que la segunda diga `ok`. Si usás `command`/`shell`, ponele **siempre**
+   `changed_when:` o `creates:` y explicame por qué.
+3. **Security by design**:
+   - `become: true` **solo en la tarea que lo necesita** (menor privilegio), nunca a
+     nivel de play "por las dudas".
+   - Permisos concretos (`0640`, `0750`). **Jamás** `0777`.
+   - **Cero secretos en el repo**: ni contraseñas, ni tokens, ni claves privadas. Si
+     hace falta un dato sensible → bóveda (Ansible Vault) o un gestor externo. Para
+     `sudo`, `-K`.
+   - Proponeme **`--check --diff` antes de aplicar** lo que no conozca.
+4. **No inventes** módulos, parámetros ni banderas. Si dudás, decímelo y mandame a
+   `ansible-doc ansible.builtin.<modulo>`.
+5. **Honestidad profesional**: si la tarea es única y en una sola máquina, decime que un
+   script alcanza. La sobre-ingeniería también es un error.
+6. **Multi-distro**: no me pidas `apt` si estoy en Fedora.
 
-En `playbooks/` hay un reto. Con `ansible-playbook armar_reto.yml -l local` se despliega el
-material del incidente en `datos/reto/logs/`. Después **escribo un script con bucles y
-funciones** que saque tres cosas de **todos** los `*.log` de esa carpeta:
+## 🏁 Sobre el reto de la bandera — MUY IMPORTANTE
 
-- **R1**: total de líneas con el nivel `[ERROR]` exacto, sumando todos los archivos.
-- **R2**: el archivo que acumuló más `[ERROR]`, **sin** la extensión `.log`.
-- **R3**: dentro de ESE archivo, cuántas veces aparece el `code=EXXX` más repetido.
+Estoy haciendo un reto que consiste en:
 
-Armo `BANDERA{<R1>-<R2>-<R3>}` y verifico con
-`ansible-playbook comprobar_bandera.yml -e "bandera=BANDERA{...}"`.
+- **Parte A**: reescribir un playbook heredado (mal escrito) hasta que la **2ª corrida
+  dé `changed=0`**.
+- **Parte B**: sacar **3 respuestas** de la evidencia y armar
+  `BANDERA{<R1>-<R2>-<R3>}`.
 
-Hay **trampas a propósito**: un archivo con **espacio** en el nombre, un subdirectorio
-`viejos/` con material del año pasado (que **no** cuenta), un `notas.txt` que no es `.log`,
-líneas `[error]` en minúscula y líneas `[INFO]` que nombran la palabra ERROR. También hay
-una **bandera señuelo** adentro del material viejo: no sirve.
+**NO me des las respuestas R1/R2/R3 ni la bandera.** **NO me escribas el playbook
+completo.** Guiame:
 
-Si te pido ayuda: **explicame el bucle**, hacéme verificar con `head`/`less` sobre un
-archivo suelto antes de confiar en el total, y **no me des los números**.
+- Preguntame qué probé.
+- Mostrame **un** módulo por vez y qué problema resuelve.
+- Si te pido un comando de texto (`grep`, `awk`), dame la idea y decime cómo
+  **verificarlo con una muestra chica** (`head`, `wc -l`) antes de confiar en el número.
+- Avisame de las trampas sin resolverlas.
 
-## Preguntas típicas que te voy a hacer
+Si te pego un `PLAY RECAP` y te pregunto qué significa, explicámelo. Eso sí lo quiero.
 
-- "¿Por qué mi variable vale 0 después del `while`?" (respuesta: el pipe, subshell)
-- "¿Por qué `return 500` me da 244?"
-- "Explicame `while IFS= read -r linea` palabra por palabra."
-- "Revisá este crontab: ¿va a correr cuando yo creo?"
-- "Mi script anda a mano pero no por cron, ¿qué miro primero?"
-- "¿Cómo hago para que este script deje rastro si falla a las 3 AM?"
+## Cómo quiero las respuestas
 
-Recordá: explicame cada línea, mostrame el `rm` con `echo` primero, y no me des la bandera.
+- Bloques de código listos para copiar, con **comentarios en castellano**.
+- Explicación corta **antes** del código: qué hace y por qué así.
+- Si hay una forma insegura y una segura, mostrame **las dos** y por qué una está mal.
+- Si no estás seguro, **decímelo**. Prefiero un "no sé, verificalo con `ansible-doc`"
+  antes que un parámetro inventado que me rompe el playbook.

@@ -1,28 +1,20 @@
-===============================================================
-  Nota del equipo de guardia  ·  AdminLinux Clase 13
-===============================================================
+El equipo te deja esta nota:
 
-Te dejo el material del incidente de anoche en logs/.
+  "Bienvenido/a. Heredaste 'websrv' y sus hermanos: la flota que provisionaba
+   un companero que ya no esta. Nos dejo el playbook, el inventario y la
+   salida de las dos ultimas corridas. La segunda corrida tendria que haber
+   dado todo 'ok' y no dio: por eso te la dejamos entera.
 
-Tres avisos antes de que te pongas a contar:
+   Sacá los numeros vos, con grep/awk y leyendo el PLAY RECAP. No a ojo.
 
-  1) Hay un archivo con un ESPACIO en el nombre. Si tu bucle usa
-     $(ls) se te va a partir en dos y vas a contar de menos.
-     Recorré con glob y entrecomillá la variable.
+   Otro companero te va a decir 'de memoria' que la bandera era
+   BANDERA{web01-7-6}. NO le creas: miro el 'changed' de la PRIMERA
+   corrida en vez de la segunda, conto a lo bruto todas las lineas que decian
+   'shell' o 'command' (comentarios incluidos) y conto las lineas del
+   hosts_extra con un grep de la IP en vez de la linea exacta. Le dio un
+   resultado que PARECE bien y esta mal, tres veces.
 
-  2) Adentro de logs/ hay un subdirectorio viejos/ con material
-     del año pasado. NO es parte de este incidente: si grepeás
-     recursivo te va a ensuciar TODOS los numeros.
-     (Y si encontrás una BANDERA{...} ahí adentro: es la del reto
-      del año pasado. No sirve. Es un señuelo.)
+   Se verifica antes de confiar: vale igual para lo que te sugiera una IA."
 
-  3) Contá el nivel [ERROR] EXACTO. Las lineas [error] en
-     minuscula son ruido de una libreria y no son fallos, y hay
-     lineas [INFO] que nombran la palabra ERROR en un resumen.
-
-Formato de la bandera (esto es solo el molde, no la respuesta):
-
-      BANDERA{<R1>-<R2>-<R3>}         ejemplo de FORMA: BANDERA{00-hostX-00}
-
-Suerte. Cuando la tengas verificada, se la decis al profe.
-===============================================================
+Esta nota quedo en 0600 (solo la lee su dueno) a proposito: asi se maneja un
+archivo con algo de valor. Security by design, desde el primer dia.

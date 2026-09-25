@@ -1,7 +1,0 @@
-# Un servicio por linea. Lineas que empiezan con # son comentarios.
-ssh
-cron
-nginx
-postgresql
-# docker    (desactivado en esta VM)
-chrony
